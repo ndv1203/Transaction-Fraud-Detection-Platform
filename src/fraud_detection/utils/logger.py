@@ -1,0 +1,2 @@
+"""Standard logging setup."""
+

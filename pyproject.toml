@@ -1,7 +1,7 @@
 [project]
 name = "transaction-fraud-detection-platform"
 version = "0.1.0"
-description = "Add your description here"
+description = "End-to-end Transaction Fraud Detection Platform (Preprocessing, ML Pipeline, API & Dashboard)"
 readme = "README.md"
 authors = [
     { name = "namdv1203", email = "namdovan2006@gmail.com" }
@@ -10,7 +10,18 @@ requires-python = ">=3.14"
 dependencies = []
 
 [project.scripts]
-transaction-fraud-detection-platform = "transaction_fraud_detection_platform:main"
+run-preprocessing = "scripts.run_preprocessing:main"
+run-training = "scripts.run_training:main"
+run-evaluation = "scripts.run_evaluation:main"
+run-app = "scripts.run_app:main"
+
+[tool.uv.build-backend]
+module-name = "fraud_detection"
+module-root = "src"
+
+[tool.pytest.ini_options]
+pythonpath = [".", "src"]
+testpaths = ["tests"]
 
 [build-system]
 requires = ["uv_build>=0.12.10,<0.13.0"]

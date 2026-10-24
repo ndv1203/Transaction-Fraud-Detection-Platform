@@ -1,0 +1,53 @@
+project:
+  name: "transaction-fraud-detection-platform"
+  dataset: "sparkov_credit_card_fraud"
+  seed: 42
+
+paths:
+  raw_data: "data/raw"
+  interim_data: "data/interim"
+  processed_data: "data/processed"
+  models_dir: "models"
+  reports_dir: "reports"
+
+preprocessing:
+  id_col: "trans_num"
+  card_col: "cc_num"
+  target_col: "is_fraud"
+  timestamp_col: "trans_date_trans_time"
+  unix_time_col: "unix_time"
+  rename_cols:
+    state: "state_code"
+    long: "lon"
+    merch_long: "merch_lon"
+  drop_cols:
+    - "Unnamed: 0"
+    - "first"
+    - "last"
+    - "street"
+  categorical_cols:
+    - "merchant"
+    - "category"
+    - "gender"
+    - "state_code"
+    - "job"
+  numerical_cols:
+    - "amt"
+    - "lat"
+    - "lon"
+    - "city_pop"
+    - "merch_lat"
+    - "merch_lon"
+  val_size: 0.15
+
+training:
+  threshold: 0.5
+
+app:
+  api_host: "0.0.0.0"
+  api_port: 8000
+  ui_port: 8501
+
+database:
+  url: "sqlite:///database/fraud_detection.db"
+  echo: false
