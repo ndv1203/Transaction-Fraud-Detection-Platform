@@ -1,2 +1,1 @@
-"""Feature engineering for transaction fraud detection (time windows, velocity, encodings)."""
-
+"""Feature engineering for transaction fraud detection (velocity, distance, time)."""

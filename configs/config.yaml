@@ -10,6 +10,14 @@ paths:
   models_dir: "models"
   reports_dir: "reports"
 
+data_source:
+  gdrive_file_id: "1Nnqnr2tv42mv5Pbtmj1eLSRszjOzbDw3"
+  gdrive_url: "https://drive.google.com/file/d/1Nnqnr2tv42mv5Pbtmj1eLSRszjOzbDw3/view?usp=sharing"
+  archive_name: "sparkov_fraud.zip"
+  train_csv: "fraudTrain.csv"
+  test_csv: "fraudTest.csv"
+  remove_zip_after_extract: true
+
 preprocessing:
   id_col: "trans_num"
   card_col: "cc_num"
