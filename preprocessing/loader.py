@@ -91,7 +91,6 @@ def download_and_extract_raw_data(
             id=file_id,
             output=str(archive_path),
             quiet=False,
-            fuzzy=True,
         )
         if not downloaded_path or not archive_path.exists():
             raise RuntimeError(
