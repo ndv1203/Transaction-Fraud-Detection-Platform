@@ -1,0 +1,36 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - "feat/**"
+      - "fix/**"
+      - "refactor/**"
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  quality-and-tests:
+    name: Code Quality (Ruff) & Unit Tests (Pytest)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Install Python and dependencies
+        run: uv sync --locked
+
+      - name: Run Ruff Linter & Google Docstring Checks
+        run: uv run ruff check preprocessing src database app scripts tests
+
+      - name: Run Unit Tests with Pytest
+        run: uv run pytest -v
+
