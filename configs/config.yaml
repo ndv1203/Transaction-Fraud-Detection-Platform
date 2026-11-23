@@ -49,5 +49,5 @@ app:
   ui_port: 8501
 
 database:
-  url: "sqlite:///database/fraud_detection.db"
+  url: "postgresql+psycopg://postgres:postgres@localhost:5432/fraud_detection"
   echo: false
