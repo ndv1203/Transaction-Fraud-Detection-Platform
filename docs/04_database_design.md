@@ -8,26 +8,299 @@ Hệ thống sử dụng một cơ sở dữ liệu **PostgreSQL** duy nhất đ
 
 ---
 
-## 4.1. Sơ đồ Quan hệ Thực thể Tổng quan (ER Overview)
+## 4.1. Sơ đồ Quan hệ tổng quan (ERD Overview)
 
-```mermaid
-erDiagram
-    RAW_INGESTION_BATCHES ||--o{ RAW_RAW_TRANSACTIONS : contains
-    RAW_INGESTION_BATCHES ||--o{ CORE_TRANSACTIONS : tracks
 
-    CORE_CARDS ||--o{ CORE_TRANSACTIONS : initiates
-    CORE_MERCHANTS ||--o{ CORE_TRANSACTIONS : receives
+@startuml
+hide circle
+skinparam linetype ortho
+skinparam entity {
+    BackgroundColor #F8F9FA
+    BorderColor #455A64
+}
 
-    CORE_TRANSACTIONS ||--o| CORE_TRANSACTION_LABELS : has_ground_truth
-    CORE_TRANSACTIONS ||--o| CORE_TRANSACTION_FEATURES : has_features
-    CORE_TRANSACTIONS ||--o{ CORE_FRAUD_PREDICTIONS : evaluated_by
-    CORE_FRAUD_PREDICTIONS ||--o{ CORE_FRAUD_ALERTS : triggers
+entity "RAW_INGESTION_BATCHES" as RAW_BATCHES {
+    * batch_id : BIGINT <<PK>>
+    --
+    source_name : VARCHAR
+    ingestion_time : TIMESTAMP
+    file_name : VARCHAR
+    record_count : BIGINT
+}
 
-    ANALYTICS_DIM_TIME ||--o{ ANALYTICS_FACT_TRANSACTIONS : time_key
-    ANALYTICS_DIM_CARDS ||--o{ ANALYTICS_FACT_TRANSACTIONS : card_key
-    ANALYTICS_DIM_MERCHANTS ||--o{ ANALYTICS_FACT_TRANSACTIONS : merchant_key
-    ANALYTICS_DIM_CATEGORIES ||--o{ ANALYTICS_FACT_TRANSACTIONS : category_key
-```
+entity "RAW_RAW_TRANSACTIONS" as RAW_TX {
+    * raw_id : BIGINT <<PK>>
+    --
+    batch_id : BIGINT <<FK>>
+    raw_payload : JSON
+    ingested_at : TIMESTAMP
+}
+
+entity "CORE_CARDS" as CARDS {
+    * card_id : BIGINT <<PK>>
+    --
+    card_number : VARCHAR
+    customer_id : BIGINT
+}
+
+entity "CORE_MERCHANTS" as MERCHANTS {
+    * merchant_id : BIGINT <<PK>>
+    --
+    merchant_name : VARCHAR
+    merchant_category : VARCHAR
+}
+
+entity "CORE_TRANSACTIONS" as TX {
+    * transaction_id : BIGINT <<PK>>
+    --
+    batch_id : BIGINT <<FK>>
+    card_id : BIGINT <<FK>>
+    merchant_id : BIGINT <<FK>>
+    transaction_time : TIMESTAMP
+    amount : DECIMAL
+    category : VARCHAR
+    is_online : BOOLEAN
+}
+
+entity "CORE_TRANSACTION_LABELS" as LABELS {
+    * transaction_id : BIGINT <<PK, FK>>
+    --
+    is_fraud : BOOLEAN
+}
+
+entity "CORE_TRANSACTION_FEATURES" as FEATURES {
+    * transaction_id : BIGINT <<PK, FK>>
+    --
+    age : INT
+    distance_from_home : FLOAT
+    hour_of_day : INT
+}
+
+entity "CORE_FRAUD_PREDICTIONS" as PREDICTIONS {
+    * prediction_id : BIGINT <<PK>>
+    --
+    transaction_id : BIGINT <<FK>>
+    model_version : VARCHAR
+    fraud_score : FLOAT
+    predicted_label : BOOLEAN
+    predicted_at : TIMESTAMP
+}
+
+entity "CORE_FRAUD_ALERTS" as ALERTS {
+    * alert_id : BIGINT <<PK>>
+    --
+    prediction_id : BIGINT <<FK>>
+    alert_status : VARCHAR
+    created_at : TIMESTAMP
+}
+
+entity "ANALYTICS_DIM_TIME" as DIM_TIME {
+    * time_key : BIGINT <<PK>>
+    --
+    date : DATE
+    hour : INT
+    day : INT
+    month : INT
+    year : INT
+}
+
+entity "ANALYTICS_DIM_CARDS" as DIM_CARDS {
+    * card_key : BIGINT <<PK>>
+    --
+    card_id : BIGINT
+    gender : VARCHAR
+    age_group : VARCHAR
+}
+
+entity "ANALYTICS_DIM_MERCHANTS" as DIM_MERCHANTS {
+    * merchant_key : BIGINT <<PK>>
+    --
+    merchant_id : BIGINT
+    merchant_name : VARCHAR
+    merchant_category : VARCHAR
+}
+
+entity "ANALYTICS_DIM_CATEGORIES" as DIM_CATEGORIES {
+    * category_key : BIGINT <<PK>>
+    --
+    category_name : VARCHAR
+}
+
+entity "ANALYTICS_FACT_TRANSACTIONS" as FACT_TX {
+    * fact_id : BIGINT <<PK>>
+    --
+    time_key : BIGINT <<FK>>
+    card_key : BIGINT <<FK>>
+    merchant_key : BIGINT <<FK>>
+    category_key : BIGINT <<FK>>
+    transaction_id : BIGINT
+    amount : DECIMAL
+    is_fraud : BOOLEAN
+}
+
+RAW_BATCHES ||--o{ RAW_TX : contains
+RAW_BATCHES ||--o{ TX : tracks
+
+CARDS ||--o{ TX : initiates
+MERCHANTS ||--o{ TX : receives
+
+TX ||--o| LABELS : has_ground_truth
+TX ||--o| FEATURES : has_features
+TX ||--o{ PREDICTIONS : evaluated_by
+PREDICTIONS ||--o{ ALERTS : triggers
+
+DIM_TIME ||--o{ FACT_TX : time_key
+DIM_CARDS ||--o{ FACT_TX : card_key
+DIM_MERCHANTS ||--o{ FACT_TX : merchant_key
+DIM_CATEGORIES ||--o{ FACT_TX : category_key
+
+@enduml
+
+@startuml
+hide circle
+skinparam linetype ortho
+skinparam entity {
+    BackgroundColor #F8F9FA
+    BorderColor #455A64
+}
+
+entity "RAW_INGESTION_BATCHES" as RAW_BATCHES {
+    * batch_id : BIGINT <<PK>>
+    --
+    source_name : VARCHAR
+    ingestion_time : TIMESTAMP
+    file_name : VARCHAR
+    record_count : BIGINT
+}
+
+entity "RAW_RAW_TRANSACTIONS" as RAW_TX {
+    * raw_id : BIGINT <<PK>>
+    --
+    batch_id : BIGINT <<FK>>
+    raw_payload : JSON
+    ingested_at : TIMESTAMP
+}
+
+entity "CORE_CARDS" as CARDS {
+    * card_id : BIGINT <<PK>>
+    --
+    card_number : VARCHAR
+    customer_id : BIGINT
+}
+
+entity "CORE_MERCHANTS" as MERCHANTS {
+    * merchant_id : BIGINT <<PK>>
+    --
+    merchant_name : VARCHAR
+    merchant_category : VARCHAR
+}
+
+entity "CORE_TRANSACTIONS" as TX {
+    * transaction_id : BIGINT <<PK>>
+    --
+    batch_id : BIGINT <<FK>>
+    card_id : BIGINT <<FK>>
+    merchant_id : BIGINT <<FK>>
+    transaction_time : TIMESTAMP
+    amount : DECIMAL
+    category : VARCHAR
+    is_online : BOOLEAN
+}
+
+entity "CORE_TRANSACTION_LABELS" as LABELS {
+    * transaction_id : BIGINT <<PK, FK>>
+    --
+    is_fraud : BOOLEAN
+}
+
+entity "CORE_TRANSACTION_FEATURES" as FEATURES {
+    * transaction_id : BIGINT <<PK, FK>>
+    --
+    age : INT
+    distance_from_home : FLOAT
+    hour_of_day : INT
+}
+
+entity "CORE_FRAUD_PREDICTIONS" as PREDICTIONS {
+    * prediction_id : BIGINT <<PK>>
+    --
+    transaction_id : BIGINT <<FK>>
+    model_version : VARCHAR
+    fraud_score : FLOAT
+    predicted_label : BOOLEAN
+    predicted_at : TIMESTAMP
+}
+
+entity "CORE_FRAUD_ALERTS" as ALERTS {
+    * alert_id : BIGINT <<PK>>
+    --
+    prediction_id : BIGINT <<FK>>
+    alert_status : VARCHAR
+    created_at : TIMESTAMP
+}
+
+entity "ANALYTICS_DIM_TIME" as DIM_TIME {
+    * time_key : BIGINT <<PK>>
+    --
+    date : DATE
+    hour : INT
+    day : INT
+    month : INT
+    year : INT
+}
+
+entity "ANALYTICS_DIM_CARDS" as DIM_CARDS {
+    * card_key : BIGINT <<PK>>
+    --
+    card_id : BIGINT
+    gender : VARCHAR
+    age_group : VARCHAR
+}
+
+entity "ANALYTICS_DIM_MERCHANTS" as DIM_MERCHANTS {
+    * merchant_key : BIGINT <<PK>>
+    --
+    merchant_id : BIGINT
+    merchant_name : VARCHAR
+    merchant_category : VARCHAR
+}
+
+entity "ANALYTICS_DIM_CATEGORIES" as DIM_CATEGORIES {
+    * category_key : BIGINT <<PK>>
+    --
+    category_name : VARCHAR
+}
+
+entity "ANALYTICS_FACT_TRANSACTIONS" as FACT_TX {
+    * fact_id : BIGINT <<PK>>
+    --
+    time_key : BIGINT <<FK>>
+    card_key : BIGINT <<FK>>
+    merchant_key : BIGINT <<FK>>
+    category_key : BIGINT <<FK>>
+    transaction_id : BIGINT
+    amount : DECIMAL
+    is_fraud : BOOLEAN
+}
+
+RAW_BATCHES ||--o{ RAW_TX : contains
+RAW_BATCHES ||--o{ TX : tracks
+
+CARDS ||--o{ TX : initiates
+MERCHANTS ||--o{ TX : receives
+
+TX ||--o| LABELS : has_ground_truth
+TX ||--o| FEATURES : has_features
+TX ||--o{ PREDICTIONS : evaluated_by
+PREDICTIONS ||--o{ ALERTS : triggers
+
+DIM_TIME ||--o{ FACT_TX : time_key
+DIM_CARDS ||--o{ FACT_TX : card_key
+DIM_MERCHANTS ||--o{ FACT_TX : merchant_key
+DIM_CATEGORIES ||--o{ FACT_TX : category_key
+
+@enduml
+
 
 ---
 

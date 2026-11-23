@@ -8,9 +8,16 @@ Dự án phát hiện gian lận giao dịch (Transaction Fraud Detection) kết
 Transaction-Fraud-Detection-Platform/
 ├── configs/                        # File cấu hình chung (YAML)
 │   └── config.yaml
-├── docs/                           # Tài liệu dự án (kiến trúc, từ điển dữ liệu...)
-│   ├── architecture.md
-│   └── data_dictionary.md
+├── docs/                           # Tài liệu dự án chia theo 8 chuyên đề
+│   ├── README.md
+│   ├── 01_overview.md
+│   ├── 02_architecture.md
+│   ├── 03_data_dictionary.md
+│   ├── 04_database_design.md
+│   ├── 05_pipelines_and_eda.md
+│   ├── 06_fraud_detection.md
+│   ├── 07_api_and_dashboard.md
+│   └── 08_roadmap_and_standards.md
 ├── data/                           # Lưu trữ dữ liệu (raw, interim, processed)
 │   ├── raw/
 │   ├── interim/
